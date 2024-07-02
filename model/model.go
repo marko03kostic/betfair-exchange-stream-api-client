@@ -1,4 +1,4 @@
-package main
+package model
 
 type BetfairAuthenticationMessage struct {
 	Op      string `json:"op"`

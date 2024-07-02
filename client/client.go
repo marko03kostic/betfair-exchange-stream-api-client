@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"bufio"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"github.com/marko03kostic/betfair-stream-client/model"
 )
 
 type ExchangeStreamClient struct {
@@ -42,7 +43,7 @@ func (client *ExchangeStreamClient) Connect() error {
 }
 
 func (client *ExchangeStreamClient) SendAuthenticationMessage() error {
-	authMessage := BetfairAuthenticationMessage{
+	authMessage := model.BetfairAuthenticationMessage{
 		Op:      "authentication",
 		ID:      1,
 		AppKey:  client.appKey,
@@ -59,12 +60,12 @@ func (client *ExchangeStreamClient) SendAuthenticationMessage() error {
 
 func (client *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string) error {
 	
-	betfairMarketFilter := BetfairMarketFilter{
+	betfairMarketFilter := model.BetfairMarketFilter{
 		MarketIds: marketIds,
 	}
 	
 	
-	marketSubscriptionMessage := BetfairMarketSubscriptionMessage{
+	marketSubscriptionMessage := model.BetfairMarketSubscriptionMessage{
 		Op: "marketSubscription",
 		ID: 2,
 		MarketFilter: betfairMarketFilter,

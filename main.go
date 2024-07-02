@@ -3,27 +3,28 @@ package main
 import (
 	"log"
 	"time"
+	"github.com/marko03kostic/betfair-stream-client/client"
 )
 
 func main() {
-	config, err := loadConfig("config.json")
+	config, err := client.LoadConfig("config.json")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	client := NewExchangeStreamClient(config.AppKey, config.Session)
+	c := client.NewExchangeStreamClient(config.AppKey, config.Session)
 
-	err1 := client.Connect()
+	err1 := c.Connect()
 	if err1 != nil {
 		log.Fatalf("failed to connect: %v", err1)
 	}
-	defer client.Close()
+	defer c.Close()
 
-	client.SendAuthenticationMessage()
+	c.SendAuthenticationMessage()
 
-	marketIds := [1]string{"1.230179589"}
+	marketIds := [1]string{"1.230181554"}
 
-	client.SendMarketSubscriptionMessage(marketIds[:])
+	c.SendMarketSubscriptionMessage(marketIds[:])
 
 	time.Sleep(20 * time.Second)
 }
