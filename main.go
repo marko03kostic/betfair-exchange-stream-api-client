@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/marko03kostic/betfair-stream-client/client"
 	"github.com/marko03kostic/betfair-stream-client/cache"
+	"github.com/marko03kostic/betfair-stream-client/client"
 	"log"
 	"time"
 )
@@ -23,11 +23,15 @@ func main() {
 	}
 	defer c.Close()
 
-	c.SendAuthenticationMessage()
+	err3 := c.SendAuthenticationMessage()
+	if err3 != nil {
+		log.Fatalf("failed to connect: %v", err3)
+	}
+	marketIds := [1]string{"1.230303037"}
 
-	marketIds := [1]string{"1.230332162"}
-
-	c.SendMarketSubscriptionMessage(marketIds[:])
-
+	err4 := c.SendMarketSubscriptionMessage(marketIds[:])
+	if err4 != nil {
+		log.Fatalf("failed to connect: %v", err4)
+	}
 	time.Sleep(20 * time.Second)
 }

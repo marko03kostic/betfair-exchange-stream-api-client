@@ -2,20 +2,25 @@ package cache
 
 import (
 	"encoding/json"
+	"sync"
+
 	"github.com/marko03kostic/betfair-stream-client/model"
 )
 
 type StatusCache struct {
 	ConnectionClosed     bool
 	ConnectionsAvailable int
+	ResponseChans        map[int]chan string
+	Mu                   sync.Mutex
 }
 
 func NewStatusCache() *StatusCache {
-	return &StatusCache{}
+	return &StatusCache{
+		ResponseChans: make(map[int]chan string),
+	}
 }
 
 func (s *StatusCache) Parse(message string) error {
-
 	var betfairStatusMessage model.BetfairStatusMessage
 
 	err := json.Unmarshal([]byte(message), &betfairStatusMessage)
@@ -29,6 +34,14 @@ func (s *StatusCache) Parse(message string) error {
 		s.ConnectionsAvailable = *betfairStatusMessage.ConnectionsAvailable
 	}
 
-	return nil
+	s.Mu.Lock()
+	defer s.Mu.Unlock()
 
+	if ch, ok := s.ResponseChans[betfairStatusMessage.ID]; ok {
+		ch <- betfairStatusMessage.StatusCode
+		close(ch)
+		delete(s.ResponseChans, betfairStatusMessage.ID)
+	}
+
+	return nil
 }

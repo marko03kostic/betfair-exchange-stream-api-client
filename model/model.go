@@ -1,5 +1,10 @@
 package model
 
+type IBetfairMessage interface {
+	GetID() int
+	GetOp() string
+}
+
 type BetfairStatusMessage struct {
 	Op                   string  `json:"op"`
 	ID                   int     `json:"id"`
@@ -10,6 +15,14 @@ type BetfairStatusMessage struct {
 	ConnectionsAvailable *int    `json:"connectionsAvailable,omitempty"`
 }
 
+func (msg BetfairStatusMessage) GetID() int {
+	return msg.ID
+}
+
+func (msg BetfairStatusMessage) GetOp() string {
+	return msg.Op
+}
+
 type BetfairAuthenticationMessage struct {
 	Op      string `json:"op"`
 	ID      int    `json:"id"`
@@ -17,10 +30,26 @@ type BetfairAuthenticationMessage struct {
 	Session string `json:"session"`
 }
 
+func (msg BetfairAuthenticationMessage) GetID() int {
+	return msg.ID
+}
+
+func (msg BetfairAuthenticationMessage) GetOp() string {
+	return msg.Op
+}
+
 type BetfairConnectionMessage struct {
 	Op           string `json:"op"`
 	ID           int    `json:"id"`
 	ConnectionId string `json:"connectionId"`
+}
+
+func (msg BetfairConnectionMessage) GetID() int {
+	return msg.ID
+}
+
+func (msg BetfairConnectionMessage) GetOp() string {
+	return msg.Op
 }
 
 type BetfairSubscriptionMessage struct {
@@ -70,6 +99,14 @@ type BetfairMarketSubscriptionMessage struct {
 	MarketDataFilter    BetfairMarketDataFilter `json:"marketDataFilter"`
 }
 
+func (msg BetfairMarketSubscriptionMessage) GetID() int {
+	return msg.ID
+}
+
+func (msg BetfairMarketSubscriptionMessage) GetOp() string {
+	return msg.Op
+}
+
 type BetfairOrderSubscriptionMessage struct {
 	Op                  string             `json:"op"`
 	ID                  int                `json:"id"`
@@ -79,6 +116,14 @@ type BetfairOrderSubscriptionMessage struct {
 	InitialClk          *string            `json:"initialClk,omitempty"`
 	Clk                 *string            `json:"clk,omitempty"`
 	OrderFilter         BetfairOrderFilter `json:"orderFilter"`
+}
+
+func (msg BetfairOrderSubscriptionMessage) GetID() int {
+	return msg.ID
+}
+
+func (msg BetfairOrderSubscriptionMessage) GetOp() string {
+	return msg.Op
 }
 
 type BetfairChangeMessage struct {

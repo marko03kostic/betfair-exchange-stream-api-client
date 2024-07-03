@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/marko03kostic/betfair-stream-client/cache"
 	"github.com/marko03kostic/betfair-stream-client/model"
@@ -83,24 +84,47 @@ func (c *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string)
 	return nil
 }
 
-func (c *ExchangeStreamClient) send(data any) error {
+func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 	if c.conn == nil {
 		return fmt.Errorf("not connected")
 	}
 
-	b, err2 := json.Marshal(data)
-	if err2 != nil {
-		log.Fatalf("failed to connect: %v", err2)
+	id := msg.GetID()
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
 	}
 
 	b = append(b, "\r\n"...)
 
-	_, err := c.conn.Write(b)
+	responseChan := make(chan string, 1)
+	c.StatusCache.Mu.Lock()
+	c.StatusCache.ResponseChans[id] = responseChan
+	c.StatusCache.Mu.Unlock()
+
+	_, err = c.conn.Write(b)
 	if err != nil {
+		c.StatusCache.Mu.Lock()
+		delete(c.StatusCache.ResponseChans, id)
+		c.StatusCache.Mu.Unlock()
 		return fmt.Errorf("failed to send data: %w", err)
 	}
 
-	return nil
+	select {
+	case status := <-responseChan:
+		if status == "SUCCESS" {
+			fmt.Printf("Message %v success", id)
+			return nil
+		} else {
+			return fmt.Errorf("operation failed with status: %s", status)
+		}
+	case <-time.After(5 * time.Second):
+		c.StatusCache.Mu.Lock()
+		delete(c.StatusCache.ResponseChans, id)
+		c.StatusCache.Mu.Unlock()
+		return fmt.Errorf("operation timed out")
+	}
 }
 
 func (c *ExchangeStreamClient) Parse(message string) error {
