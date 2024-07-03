@@ -98,7 +98,7 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 
 	b = append(b, "\r\n"...)
 
-	responseChan := make(chan string, 1)
+	responseChan := make(chan bool, 1)
 	c.StatusCache.Mu.Lock()
 	c.StatusCache.ResponseChans[id] = responseChan
 	c.StatusCache.Mu.Unlock()
@@ -113,11 +113,11 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 
 	select {
 	case status := <-responseChan:
-		if status == "SUCCESS" {
+		if status {
 			fmt.Printf("Message %v success", id)
 			return nil
 		} else {
-			return fmt.Errorf("operation failed with status: %s", status)
+			return fmt.Errorf("operation failed")
 		}
 	case <-time.After(5 * time.Second):
 		c.StatusCache.Mu.Lock()

@@ -10,13 +10,13 @@ import (
 type StatusCache struct {
 	ConnectionClosed     bool
 	ConnectionsAvailable int
-	ResponseChans        map[int]chan string
+	ResponseChans        map[int]chan bool
 	Mu                   sync.Mutex
 }
 
 func NewStatusCache() *StatusCache {
 	return &StatusCache{
-		ResponseChans: make(map[int]chan string),
+		ResponseChans: make(map[int]chan bool),
 	}
 }
 
@@ -38,7 +38,7 @@ func (s *StatusCache) Parse(message string) error {
 	defer s.Mu.Unlock()
 
 	if ch, ok := s.ResponseChans[betfairStatusMessage.ID]; ok {
-		ch <- betfairStatusMessage.StatusCode
+		ch <- betfairStatusMessage.StatusCode == "SUCCESS"
 		close(ch)
 		delete(s.ResponseChans, betfairStatusMessage.ID)
 	}
