@@ -21,6 +21,4 @@
 go.work
 go.work.sum
 
-main.go
-
 config.json

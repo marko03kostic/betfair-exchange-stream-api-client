@@ -1,9 +1,10 @@
 package main
 
 import (
+	"github.com/marko03kostic/betfair-stream-client/client"
+	"github.com/marko03kostic/betfair-stream-client/cache"
 	"log"
 	"time"
-	"github.com/marko03kostic/betfair-stream-client/client"
 )
 
 func main() {
@@ -12,7 +13,9 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	c := client.NewExchangeStreamClient(config.AppKey, config.Session)
+	sc := cache.NewStatusCache()
+
+	c := client.NewExchangeStreamClient(config.AppKey, config.Session, sc)
 
 	err1 := c.Connect()
 	if err1 != nil {
@@ -22,7 +25,7 @@ func main() {
 
 	c.SendAuthenticationMessage()
 
-	marketIds := [1]string{"1.230181554"}
+	marketIds := [1]string{"1.230332162"}
 
 	c.SendMarketSubscriptionMessage(marketIds[:])
 

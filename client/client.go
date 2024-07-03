@@ -4,53 +4,58 @@ import (
 	"bufio"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/marko03kostic/betfair-stream-client/cache"
 	"github.com/marko03kostic/betfair-stream-client/model"
 )
 
 type ExchangeStreamClient struct {
-	appKey string
-	session string
-	address string
-	conn    net.Conn
-	closeCh chan struct{}
+	appKey      string
+	session     string
+	address     string
+	conn        net.Conn
+	closeCh     chan struct{}
+	StatusCache *cache.StatusCache
 }
 
-func NewExchangeStreamClient(appKey string, session string) *ExchangeStreamClient {
+func NewExchangeStreamClient(appKey string, session string, StatusCache *cache.StatusCache) *ExchangeStreamClient {
 	return &ExchangeStreamClient{
-		appKey: appKey,
-		session: session,
-		address: "stream-api.betfair.com:443",
-		closeCh: make(chan struct{}),
+		appKey:      appKey,
+		session:     session,
+		address:     "stream-api.betfair.com:443",
+		closeCh:     make(chan struct{}),
+		StatusCache: StatusCache,
 	}
 }
 
-func (client *ExchangeStreamClient) Connect() error {
+func (c *ExchangeStreamClient) Connect() error {
 	conf := &tls.Config{
 		InsecureSkipVerify: true,
 	}
 
-	conn, err := tls.Dial("tcp", client.address, conf)
+	conn, err := tls.Dial("tcp", c.address, conf)
 	if err != nil {
 		return fmt.Errorf("failed to connect: %w", err)
 	}
 
-	client.conn = conn
-	go client.receiveLoop()
+	c.conn = conn
+	go c.receiveLoop()
 	return nil
 }
 
-func (client *ExchangeStreamClient) SendAuthenticationMessage() error {
+func (c *ExchangeStreamClient) SendAuthenticationMessage() error {
 	authMessage := model.BetfairAuthenticationMessage{
 		Op:      "authentication",
 		ID:      1,
-		AppKey:  client.appKey,
-		Session: client.session,
+		AppKey:  c.appKey,
+		Session: c.session,
 	}
 
-	err := client.send(authMessage)
+	err := c.send(authMessage)
 	if err != nil {
 		return fmt.Errorf("failed to send auth message: %w", err)
 	}
@@ -58,20 +63,19 @@ func (client *ExchangeStreamClient) SendAuthenticationMessage() error {
 	return nil
 }
 
-func (client *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string) error {
-	
+func (c *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string) error {
+
 	betfairMarketFilter := model.BetfairMarketFilter{
 		MarketIds: marketIds,
 	}
-	
-	
+
 	marketSubscriptionMessage := model.BetfairMarketSubscriptionMessage{
-		Op: "marketSubscription",
-		ID: 2,
+		Op:           "marketSubscription",
+		ID:           2,
 		MarketFilter: betfairMarketFilter,
 	}
 
-	err := client.send(marketSubscriptionMessage)
+	err := c.send(marketSubscriptionMessage)
 	if err != nil {
 		return fmt.Errorf("failed to send auth message: %w", err)
 	}
@@ -79,8 +83,8 @@ func (client *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []st
 	return nil
 }
 
-func (client *ExchangeStreamClient) send(data any) error {
-	if client.conn == nil {
+func (c *ExchangeStreamClient) send(data any) error {
+	if c.conn == nil {
 		return fmt.Errorf("not connected")
 	}
 
@@ -91,7 +95,7 @@ func (client *ExchangeStreamClient) send(data any) error {
 
 	b = append(b, "\r\n"...)
 
-	_, err := client.conn.Write(b)
+	_, err := c.conn.Write(b)
 	if err != nil {
 		return fmt.Errorf("failed to send data: %w", err)
 	}
@@ -99,11 +103,45 @@ func (client *ExchangeStreamClient) send(data any) error {
 	return nil
 }
 
-func (client *ExchangeStreamClient) receiveLoop() {
-	reader := bufio.NewReader(client.conn)
+func (c *ExchangeStreamClient) Parse(message string) error {
+	var msgMap map[string]interface{}
+
+	err := json.Unmarshal([]byte(message), &msgMap)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal message: %w", err)
+	}
+
+	op, exists := msgMap["op"]
+	if !exists {
+		return errors.New("missing 'op' field in message")
+	}
+
+	opStr, ok := op.(string)
+	if !ok {
+		return errors.New("'op' field is not a string")
+	}
+
+	switch opStr {
+	case "status":
+		c.StatusCache.Parse(message)
+	case "connection":
+		fmt.Println("connection")
+	case "mcm":
+		fmt.Println("mcm")
+	case "ocm":
+		fmt.Println("ocm")
+	default:
+		return fmt.Errorf("unknown 'op' value: %s", opStr)
+	}
+
+	return nil
+}
+
+func (c *ExchangeStreamClient) receiveLoop() {
+	reader := bufio.NewReader(c.conn)
 	for {
 		select {
-		case <-client.closeCh:
+		case <-c.closeCh:
 			return
 		default:
 			response, err := reader.ReadString('\n')
@@ -111,14 +149,14 @@ func (client *ExchangeStreamClient) receiveLoop() {
 				log.Printf("Error receiving data: %v", err)
 				return
 			}
-			fmt.Println(response)
+			c.Parse(response)
 		}
 	}
 }
 
-func (client *ExchangeStreamClient) Close() {
-	if client.conn != nil {
-		close(client.closeCh)
-		client.conn.Close()
+func (c *ExchangeStreamClient) Close() {
+	if c.conn != nil {
+		close(c.closeCh)
+		c.conn.Close()
 	}
 }
