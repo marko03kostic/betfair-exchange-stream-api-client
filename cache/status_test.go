@@ -10,10 +10,10 @@ func TestStatusCache_Parse(t *testing.T) {
 		message string
 	}
 	tests := []struct {
-		name    string
-		s       *StatusCache
-		args    args
-		wantErr bool
+		name        string
+		s           *StatusCache
+		args        args
+		wantErr     bool
 		expectedErr error
 	}{
 		{
@@ -23,7 +23,7 @@ func TestStatusCache_Parse(t *testing.T) {
 					1: make(chan bool, 1),
 				},
 			},
-			args: args{message: `{"op":"status","id":1,"statusCode":"SUCCESS","connectionClosed":false,"connectionsAvailable":9}`},
+			args:    args{message: `{"op":"status","id":1,"statusCode":"SUCCESS","connectionClosed":false,"connectionsAvailable":9}`},
 			wantErr: false,
 		},
 		{
@@ -33,7 +33,7 @@ func TestStatusCache_Parse(t *testing.T) {
 					2: make(chan bool, 1),
 				},
 			},
-			args: args{message: `{"op":"status","id":2,"statusCode":"SUCCESS","connectionClosed":false}`},
+			args:    args{message: `{"op":"status","id":2,"statusCode":"SUCCESS","connectionClosed":false}`},
 			wantErr: false,
 		},
 		{
@@ -43,8 +43,8 @@ func TestStatusCache_Parse(t *testing.T) {
 					3: make(chan bool, 1),
 				},
 			},
-			args: args{message: `{"op":"status","id":3,"statusCode":"FAILURE","connectionClosed":false,"errorMessage":"some error"}`},
-			wantErr: true,
+			args:        args{message: `{"op":"status","id":3,"statusCode":"FAILURE","connectionClosed":false,"errorMessage":"some error"}`},
+			wantErr:     true,
 			expectedErr: errors.New("some error"),
 		},
 		{
@@ -54,8 +54,8 @@ func TestStatusCache_Parse(t *testing.T) {
 					4: make(chan bool, 1),
 				},
 			},
-			args: args{message: `{"op":"status","id":4,"statusCode":"FAILURE","connectionClosed":false}`},
-			wantErr: true,
+			args:        args{message: `{"op":"status","id":4,"statusCode":"FAILURE","connectionClosed":false}`},
+			wantErr:     true,
 			expectedErr: errors.New("betfair status message indicates failure"),
 		},
 		{
@@ -65,8 +65,8 @@ func TestStatusCache_Parse(t *testing.T) {
 					5: make(chan bool, 1),
 				},
 			},
-			args: args{message: `{"op":"status","id":5,"statusCode":"UNKNOWN","connectionClosed":false}`},
-			wantErr: true,
+			args:        args{message: `{"op":"status","id":5,"statusCode":"UNKNOWN","connectionClosed":false}`},
+			wantErr:     true,
 			expectedErr: errors.New("betfair status message indicates an unknown status code"),
 		},
 	}
