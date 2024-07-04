@@ -19,6 +19,7 @@ type ExchangeStreamClient struct {
 	session     string
 	address     string
 	conn        net.Conn
+	msgCount    int
 	closeCh     chan struct{}
 	StatusCache *cache.StatusCache
 }
@@ -49,9 +50,8 @@ func (c *ExchangeStreamClient) Connect() error {
 }
 
 func (c *ExchangeStreamClient) SendAuthenticationMessage() error {
-	authMessage := model.BetfairAuthenticationMessage{
+	authMessage := &model.BetfairAuthenticationMessage{
 		Op:      "authentication",
-		ID:      1,
 		AppKey:  c.appKey,
 		Session: c.session,
 	}
@@ -66,14 +66,13 @@ func (c *ExchangeStreamClient) SendAuthenticationMessage() error {
 
 func (c *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string) error {
 
-	betfairMarketFilter := model.BetfairMarketFilter{
+	betfairMarketFilter := &model.BetfairMarketFilter{
 		MarketIds: marketIds,
 	}
 
-	marketSubscriptionMessage := model.BetfairMarketSubscriptionMessage{
+	marketSubscriptionMessage := &model.BetfairMarketSubscriptionMessage{
 		Op:           "marketSubscription",
-		ID:           2,
-		MarketFilter: betfairMarketFilter,
+		MarketFilter: *betfairMarketFilter,
 	}
 
 	err := c.send(marketSubscriptionMessage)
@@ -89,7 +88,8 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 		return fmt.Errorf("not connected")
 	}
 
-	id := msg.GetID()
+	id := c.newMsgId()
+	msg.SetID(id)
 
 	b, err := json.Marshal(msg)
 	if err != nil {
@@ -114,7 +114,6 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 	select {
 	case status := <-responseChan:
 		if status {
-			fmt.Printf("Message %v success", id)
 			return nil
 		} else {
 			return fmt.Errorf("operation failed")
@@ -129,6 +128,8 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 
 func (c *ExchangeStreamClient) Parse(message string) error {
 	var msgMap map[string]interface{}
+
+	fmt.Println(message)
 
 	err := json.Unmarshal([]byte(message), &msgMap)
 	if err != nil {
@@ -183,4 +184,9 @@ func (c *ExchangeStreamClient) Close() {
 		close(c.closeCh)
 		c.conn.Close()
 	}
+}
+
+func (c *ExchangeStreamClient) newMsgId() int {
+	c.msgCount++
+	return c.msgCount
 }

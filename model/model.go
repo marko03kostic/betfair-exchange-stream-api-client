@@ -1,8 +1,7 @@
 package model
 
 type IBetfairMessage interface {
-	GetID() int
-	GetOp() string
+	SetID(int)
 }
 
 type BetfairStatusMessage struct {
@@ -15,12 +14,8 @@ type BetfairStatusMessage struct {
 	ConnectionsAvailable *int    `json:"connectionsAvailable,omitempty"`
 }
 
-func (msg BetfairStatusMessage) GetID() int {
-	return msg.ID
-}
-
-func (msg BetfairStatusMessage) GetOp() string {
-	return msg.Op
+func (msg *BetfairStatusMessage) SetID(id int) {
+	msg.ID = id
 }
 
 type BetfairAuthenticationMessage struct {
@@ -30,12 +25,8 @@ type BetfairAuthenticationMessage struct {
 	Session string `json:"session"`
 }
 
-func (msg BetfairAuthenticationMessage) GetID() int {
-	return msg.ID
-}
-
-func (msg BetfairAuthenticationMessage) GetOp() string {
-	return msg.Op
+func (msg *BetfairAuthenticationMessage) SetID(id int) {
+	msg.ID = id
 }
 
 type BetfairConnectionMessage struct {
@@ -44,12 +35,8 @@ type BetfairConnectionMessage struct {
 	ConnectionId string `json:"connectionId"`
 }
 
-func (msg BetfairConnectionMessage) GetID() int {
-	return msg.ID
-}
-
-func (msg BetfairConnectionMessage) GetOp() string {
-	return msg.Op
+func (msg *BetfairConnectionMessage) SetID(id int) {
+	msg.ID = id
 }
 
 type BetfairSubscriptionMessage struct {
@@ -99,12 +86,8 @@ type BetfairMarketSubscriptionMessage struct {
 	MarketDataFilter    BetfairMarketDataFilter `json:"marketDataFilter"`
 }
 
-func (msg BetfairMarketSubscriptionMessage) GetID() int {
-	return msg.ID
-}
-
-func (msg BetfairMarketSubscriptionMessage) GetOp() string {
-	return msg.Op
+func (msg *BetfairMarketSubscriptionMessage) SetID(id int) {
+	msg.ID = id
 }
 
 type BetfairOrderSubscriptionMessage struct {
@@ -118,12 +101,8 @@ type BetfairOrderSubscriptionMessage struct {
 	OrderFilter         BetfairOrderFilter `json:"orderFilter"`
 }
 
-func (msg BetfairOrderSubscriptionMessage) GetID() int {
-	return msg.ID
-}
-
-func (msg BetfairOrderSubscriptionMessage) GetOp() string {
-	return msg.Op
+func (msg *BetfairOrderSubscriptionMessage) SetID(id int) {
+	msg.ID = id
 }
 
 type BetfairChangeMessage struct {
