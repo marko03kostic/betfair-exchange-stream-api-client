@@ -113,36 +113,44 @@ type BetfairChangeMessage struct {
 	ConflateMs  *int   `json:"conflateMs,omitempty"`
 	Status      string `json:"status"`
 	HeartbeatMs int    `json:"heartbeatMs"`
-	Pt          int    `json:"pt"`
+	Pt          int64    `json:"pt"`
 	InitialClk  string `json:"initialClk"`
 	Clk         string `json:"clk"`
 }
 
 type BetfairMarketDefinition struct {
-	ID                    string  `json:"id"`
-	Venue                 string  `json:"venue"`
-	BspMarket             bool    `json:"bspMarket"`
-	TurnInPlayEnabled     bool    `json:"turnInPlayEnabled"`
-	PersistenceEnabled    bool    `json:"persistenceEnabled"`
-	MarketBaseRate        float64 `json:"marketBaseRate"`
-	EventId               string  `json:"eventId"`
-	EventTypeId           string  `json:"eventTypeId"`
-	NumberOfWinners       int     `json:"numberOfWinners"`
-	BettingType           string  `json:"bettingType"`
-	MarketType            string  `json:"marketType"`
-	MarketTime            string  `json:"marketTime"`
-	SuspendTime           string  `json:"suspendTime"`
-	BspReconciled         bool    `json:"bspReconciled"`
-	Complete              bool    `json:"complete"`
-	InPlay                bool    `json:"inPLay"`
-	CrossMatching         bool    `json:"crossMatching"`
-	RunnersVoidable       bool    `json:"runnersVoidable"`
-	NumberOfActiveRunners int     `json:"numberOfActiveRunners"`
-	BetDelay              int     `json:"betDelay"`
-	Status                string  `json:"status"`
-	Regulators            string  `json:"regulators"`
-	DiscountAllowed       bool    `json:"discountAllowed"`
-	Timezone              string  `json:"timezone"`
+	Venue                 string   `json:"venue,omitempty"`
+	BspMarket             bool     `json:"bspMarket,omitempty"`
+	TurnInPlayEnabled     bool     `json:"turnInPlayEnabled,omitempty"`
+	PersistenceEnabled    bool     `json:"persistenceEnabled,omitempty"`
+	MarketBaseRate        float64  `json:"marketBaseRate,omitempty"`
+	EventId               string   `json:"eventId,omitempty"`
+	EventTypeId           string   `json:"eventTypeId,omitempty"`
+	NumberOfWinners       int      `json:"numberOfWinners,omitempty"`
+	BettingType           string   `json:"bettingType,omitempty"`
+	MarketType            string   `json:"marketType,omitempty"`
+	MarketTime            string   `json:"marketTime,omitempty"`
+	SuspendTime           string   `json:"suspendTime,omitempty"`
+	BspReconciled         bool     `json:"bspReconciled,omitempty"`
+	Complete              bool     `json:"complete,omitempty"`
+	InPlay                bool     `json:"inPlay,omitempty"`
+	CrossMatching         bool     `json:"crossMatching,omitempty"`
+	RunnersVoidable       bool     `json:"runnersVoidable,omitempty"`
+	NumberOfActiveRunners int      `json:"numberOfActiveRunners,omitempty"`
+	BetDelay              int      `json:"betDelay,omitempty"`
+	Status                string   `json:"status,omitempty"`
+	Runners               []BetfairRunner    `json:"runners,omitempty"`
+	Regulators            []string `json:"regulators,omitempty"`
+	DiscountAllowed       bool     `json:"discountAllowed,omitempty"`
+	Timezone              string   `json:"timezone,omitempty"`
+	OpenDate              string   `json:"openDate,omitempty"`
+	Version               int64    `json:"version,omitempty"`
+}
+
+type BetfairRunner struct {
+	Status       string `json:"status,omitempty"`
+	SortPriority int    `json:"sortPriority,omitempty"`
+	ID           int    `json:"id,omitempty"`
 }
 
 type BetfairRunnerChange struct {
@@ -222,7 +230,7 @@ type BetfairMarketChangeMessage struct {
 	ConflateMs  *int                  `json:"conflateMs,omitempty"`
 	Status      string                `json:"status"`
 	HeartbeatMs int                   `json:"heartbeatMs"`
-	Pt          int                   `json:"pt"`
+	Pt          int64                   `json:"pt"`
 	InitialClk  string                `json:"initialClk"`
 	Clk         string                `json:"clk"`
 	Mc          []BetfairMarketChange `json:"mc"`
@@ -236,7 +244,7 @@ type BetfairOrderChangeMessage struct {
 	ConflateMs  *int                        `json:"conflateMs,omitempty"`
 	Status      string                      `json:"status"`
 	HeartbeatMs int                         `json:"heartbeatMs"`
-	Pt          int                         `json:"pt"`
+	Pt          int64                         `json:"pt"`
 	InitialClk  string                      `json:"initialClk"`
 	Clk         string                      `json:"clk"`
 	Oc          []BetfairOrderAccountChange `json:"oc"`
