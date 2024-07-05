@@ -13,9 +13,11 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	mc := cache.NewMarketCache()
+
 	sc := cache.NewStatusCache()
 
-	c := client.NewExchangeStreamClient(config.AppKey, config.Session, sc)
+	c := client.NewExchangeStreamClient(config.AppKey, config.Session, sc, mc)
 
 	err1 := c.Connect()
 	if err1 != nil {
@@ -27,7 +29,7 @@ func main() {
 	if err3 != nil {
 		log.Fatalf("failed to connect: %v", err3)
 	}
-	marketIds := [1]string{"1.230303037"}
+	marketIds := [1]string{"1.230302262"}
 
 	err4 := c.SendMarketSubscriptionMessage(marketIds[:])
 	if err4 != nil {
