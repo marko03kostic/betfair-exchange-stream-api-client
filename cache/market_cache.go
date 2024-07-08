@@ -10,20 +10,20 @@ import (
 )
 
 type MarketCache struct {
-	Markets     map[string]Market
+	Markets            map[string]*Market
 	HeartbeatThreshold time.Duration
-	InitialClk  string
-	Clk         string
-	mu          sync.Mutex
-	timer       *time.Timer
-	latencyThreshold time.Duration
+	InitialClk         string
+	Clk                string
+	mu                 sync.Mutex
+	timer              *time.Timer
+	latencyThreshold   time.Duration
 }
 
 func NewMarketCache() *MarketCache {
 	return &MarketCache{
-		Markets: make(map[string]Market),
+		Markets:            make(map[string]*Market),
 		HeartbeatThreshold: time.Duration(5000) * time.Millisecond,
-		latencyThreshold: time.Duration(5) * time.Millisecond,
+		latencyThreshold:   time.Duration(5) * time.Millisecond,
 	}
 }
 
@@ -39,7 +39,7 @@ func (m *MarketCache) Parse(msg string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	timeSent := time.Unix(0, betfairMarketChangeMessage.Pt * int64(time.Millisecond))
+	timeSent := time.Unix(0, betfairMarketChangeMessage.Pt*int64(time.Millisecond))
 	timeSinceSent := time.Since(timeSent)
 
 	if betfairMarketChangeMessage.Status != "" {
@@ -65,6 +65,16 @@ func (m *MarketCache) Parse(msg string) error {
 		fmt.Print("")
 	}
 
+	if betfairMarketChangeMessage.Mc != nil {
+		for _, marketChange := range betfairMarketChangeMessage.Mc {
+			id := marketChange.ID
+			if m.Markets[id] == nil {
+				m.AddMarket(id)
+			}
+			m.Markets[id].Update(marketChange)
+		}
+	}
+
 	if timeSinceSent > m.latencyThreshold {
 		return fmt.Errorf("high latency")
 	}
@@ -83,4 +93,9 @@ func (m *MarketCache) resetTimer() {
 		defer m.mu.Unlock()
 		fmt.Println("Error: heartbeat missed")
 	})
+}
+
+func (m *MarketCache) AddMarket(id string) {
+	market := NewMarket(id)
+	m.Markets[id] = market
 }

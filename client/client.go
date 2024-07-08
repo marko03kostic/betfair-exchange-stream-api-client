@@ -22,15 +22,17 @@ type ExchangeStreamClient struct {
 	msgCount    int
 	closeCh     chan struct{}
 	StatusCache *cache.StatusCache
+	MarketCache *cache.MarketCache
 }
 
-func NewExchangeStreamClient(appKey string, session string, StatusCache *cache.StatusCache) *ExchangeStreamClient {
+func NewExchangeStreamClient(appKey string, session string, StatusCache *cache.StatusCache, MarketCache *cache.MarketCache) *ExchangeStreamClient {
 	return &ExchangeStreamClient{
 		appKey:      appKey,
 		session:     session,
 		address:     "stream-api.betfair.com:443",
 		closeCh:     make(chan struct{}),
 		StatusCache: StatusCache,
+		MarketCache: MarketCache,
 	}
 }
 
@@ -70,9 +72,14 @@ func (c *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string)
 		MarketIds: marketIds,
 	}
 
+	betfairMarketDataFilter := &model.BetfairMarketDataFilter{
+		Fields: []string{"EX_ALL_OFFERS", "EX_TRADED", "EX_TRADED_VOL", "EX_LTP"},
+	}
+
 	marketSubscriptionMessage := &model.BetfairMarketSubscriptionMessage{
 		Op:           "marketSubscription",
 		MarketFilter: *betfairMarketFilter,
+		MarketDataFilter: *betfairMarketDataFilter,
 	}
 
 	err := c.send(marketSubscriptionMessage)
@@ -129,8 +136,6 @@ func (c *ExchangeStreamClient) send(msg model.IBetfairMessage) error {
 func (c *ExchangeStreamClient) Parse(message string) error {
 	var msgMap map[string]interface{}
 
-	fmt.Println(message)
-
 	err := json.Unmarshal([]byte(message), &msgMap)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal message: %w", err)
@@ -152,7 +157,7 @@ func (c *ExchangeStreamClient) Parse(message string) error {
 	case "connection":
 		fmt.Println("connection")
 	case "mcm":
-		fmt.Println("mcm")
+		c.MarketCache.Parse(message)
 	case "ocm":
 		fmt.Println("ocm")
 	default:
