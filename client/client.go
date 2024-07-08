@@ -73,7 +73,7 @@ func (c *ExchangeStreamClient) SendMarketSubscriptionMessage(marketIds []string)
 	}
 
 	betfairMarketDataFilter := &model.BetfairMarketDataFilter{
-		Fields: []string{"EX_ALL_OFFERS", "EX_TRADED", "EX_TRADED_VOL", "EX_LTP"},
+		Fields: []string{"EX_ALL_OFFERS", "EX_TRADED", "EX_TRADED_VOL", "EX_LTP", "EX_MARKET_DEF", "EX_BEST_OFFERS_DISP"},
 	}
 
 	marketSubscriptionMessage := &model.BetfairMarketSubscriptionMessage{

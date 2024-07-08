@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -30,11 +31,15 @@ func main() {
 	if err3 != nil {
 		log.Fatalf("failed to connect: %v", err3)
 	}
+
+	mc.AddMarket("1.230452417")
+
 	marketIds := [1]string{"1.230452417"}
 
 	err4 := c.SendMarketSubscriptionMessage(marketIds[:])
 	if err4 != nil {
 		log.Fatalf("failed to connect: %v", err4)
 	}
-	time.Sleep(20 * time.Second)
+	time.Sleep(200 * time.Second)
+	fmt.Println(mc.Markets)
 }

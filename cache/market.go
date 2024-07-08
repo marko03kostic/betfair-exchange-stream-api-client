@@ -13,7 +13,7 @@ type Market struct {
 
 func NewMarket(id string) *Market {
 	return &Market{
-		ID: id,
+		ID:      id,
 		Runners: make(map[int]*Runner),
 	}
 }
@@ -22,10 +22,12 @@ func (m *Market) Update(betfairMarketChange model.BetfairMarketChange) {
 	if betfairMarketChange.Rc != nil {
 		for _, runnerChange := range betfairMarketChange.Rc {
 			id := runnerChange.ID
-			if m.Runners[id] == nil {
-				m.AddRunner(id)		
+			_, ok := m.Runners[id]
+			if !ok {
+				m.AddRunner(id)
 			}
 			m.Runners[id].Update(runnerChange)
+
 		}
 	}
 }

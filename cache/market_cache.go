@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -51,7 +52,7 @@ func (m *MarketCache) Parse(msg string) error {
 	}
 
 	if betfairMarketChangeMessage.HeartbeatMs != 0 {
-		m.HeartbeatThreshold = time.Duration(betfairMarketChangeMessage.HeartbeatMs) * time.Millisecond
+		m.HeartbeatThreshold = time.Duration(int64(float64(betfairMarketChangeMessage.HeartbeatMs) * 1.05)) * time.Millisecond
 	}
 
 	switch betfairMarketChangeMessage.Ct {
@@ -68,10 +69,12 @@ func (m *MarketCache) Parse(msg string) error {
 	if betfairMarketChangeMessage.Mc != nil {
 		for _, marketChange := range betfairMarketChangeMessage.Mc {
 			id := marketChange.ID
-			if m.Markets[id] == nil {
-				m.AddMarket(id)
+			market, ok := m.Markets[id]
+			if ok {
+				market.Update(marketChange)
+			} else {
+				log.Fatalf("market %v not in markets", id)
 			}
-			m.Markets[id].Update(marketChange)
 		}
 	}
 

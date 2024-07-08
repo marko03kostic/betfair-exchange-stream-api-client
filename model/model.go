@@ -123,7 +123,7 @@ type BetfairMarketDefinition struct {
 	BspMarket             bool            `json:"bspMarket,omitempty"`
 	TurnInPlayEnabled     bool            `json:"turnInPlayEnabled,omitempty"`
 	PersistenceEnabled    bool            `json:"persistenceEnabled,omitempty"`
-	MarketBaseRate        float64         `json:"marketBaseRate,omitempty"`
+	MarketBaseRate        float32         `json:"marketBaseRate,omitempty"`
 	EventId               string          `json:"eventId,omitempty"`
 	EventTypeId           string          `json:"eventTypeId,omitempty"`
 	NumberOfWinners       int             `json:"numberOfWinners,omitempty"`
@@ -156,35 +156,35 @@ type BetfairRunner struct {
 type BetfairRunnerChange struct {
 	ID    int         `json:"id"`
 	Con   bool        `json:"con"`
-	Tv    float64     `json:"tv"`
-	Ltp   float64     `json:"ltp"`
-	Spn   float64     `json:"spn"`
-	Spf   float64     `json:"spf"`
-	Batb  [][]float64 `json:"batb"`
-	Batl  [][]float64 `json:"batl"`
-	Bdatb [][]float64 `json:"bdatb"`
-	Bdatl [][]float64 `json:"bdatl"`
-	Atb   [][]float64 `json:"atb"`
-	Atl   [][]float64 `json:"atl"`
-	Spb   [][]float64 `json:"spb"`
-	Spl   [][]float64 `json:"spl"`
-	Trd   [][]float64 `json:"trd"`
-	Hc    float64     `json:"hc"`
+	Tv    float32     `json:"tv"`
+	Ltp   float32     `json:"ltp"`
+	Spn   float32     `json:"spn"`
+	Spf   float32     `json:"spf"`
+	Batb  [][3]float32 `json:"batb"`
+	Batl  [][3]float32 `json:"batl"`
+	Bdatb [][3]float32 `json:"bdatb"`
+	Bdatl [][3]float32 `json:"bdatl"`
+	Atb   [][2]float32 `json:"atb"`
+	Atl   [][2]float32 `json:"atl"`
+	Spb   [][2]float32 `json:"spb"`
+	Spl   [][2]float32 `json:"spl"`
+	Trd   [][2]float32 `json:"trd"`
+	Hc    float32     `json:"hc"`
 }
 
 type BetfairMarketChange struct {
 	Rc               []BetfairRunnerChange   `json:"rc"`
 	Img              bool                    `json:"img"`
-	Tv               float64                 `json:"tv"`
+	Tv               float32                 `json:"tv"`
 	MarketDefinition BetfairMarketDefinition `json:"marketDefinition"`
 	ID               string                  `json:"id"`
 }
 
 type BetfairUnmatchedOrder struct {
 	ID     string  `json:"id"`
-	P      float64 `json:"p"`
-	S      float64 `json:"s"`
-	Bsp    float64 `json:"bsp"`
+	P      float32 `json:"p"`
+	S      float32 `json:"s"`
+	Bsp    float32 `json:"bsp"`
 	Side   string  `json:"side"`
 	Status string  `json:"status"`
 	Pt     string  `json:"pt"`
@@ -194,12 +194,12 @@ type BetfairUnmatchedOrder struct {
 	Cd     int     `json:"cd"`
 	Ld     int     `json:"ld"`
 	Lsrc   string  `json:"lsrc"`
-	Avp    float64 `json:"avp"`
-	Sm     float64 `json:"sm"`
-	Sr     float64 `json:"sr"`
-	Sl     float64 `json:"sl"`
-	Sc     float64 `json:"sc"`
-	Sv     float64 `json:"sv"`
+	Avp    float32 `json:"avp"`
+	Sm     float32 `json:"sm"`
+	Sr     float32 `json:"sr"`
+	Sl     float32 `json:"sl"`
+	Sc     float32 `json:"sc"`
+	Sv     float32 `json:"sv"`
 	Rac    string  `json:"rac"`
 	Rc     string  `json:"rc"`
 	Rfo    string  `json:"rfo"`
@@ -211,8 +211,8 @@ type BetfairOrderChange struct {
 	ID        string                  `json:"id"`
 	Hc        *string                 `json:"hc,omitempty"`
 	Uo        []BetfairUnmatchedOrder `json:"uo"`
-	Mb        [][]float64             `json:"mb"`
-	Ml        [][]float64             `json:"ml"`
+	Mb        [][]float32             `json:"mb"`
+	Ml        [][]float32             `json:"ml"`
 }
 
 type BetfairOrderAccountChange struct {
