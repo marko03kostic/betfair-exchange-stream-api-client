@@ -25,7 +25,9 @@ func main() {
 	if err1 != nil {
 		log.Fatalf("failed to connect: %v", err1)
 	}
+	
 	defer c.Close()
+	defer mc.StopTimer()
 
 	err3 := c.SendAuthenticationMessage()
 	if err3 != nil {
@@ -40,6 +42,7 @@ func main() {
 	if err4 != nil {
 		log.Fatalf("failed to connect: %v", err4)
 	}
-	time.Sleep(200 * time.Second)
+
+	time.Sleep(20 * time.Second)
 	fmt.Println(mc.Markets)
 }

@@ -98,6 +98,12 @@ func (m *MarketCache) resetTimer() {
 	})
 }
 
+func (m *MarketCache) StopTimer() {
+	if m.timer != nil {
+		m.timer.Stop()
+	}
+}
+
 func (m *MarketCache) AddMarket(id string) {
 	market := NewMarket(id)
 	m.Markets[id] = market
