@@ -3,7 +3,6 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -17,14 +16,12 @@ type MarketCache struct {
 	Clk                string
 	mu                 sync.Mutex
 	timer              *time.Timer
-	latencyThreshold   time.Duration
 }
 
 func NewMarketCache() *MarketCache {
 	return &MarketCache{
 		Markets:            make(map[string]*Market),
 		HeartbeatThreshold: time.Duration(5000) * time.Millisecond,
-		latencyThreshold:   time.Duration(5) * time.Millisecond,
 	}
 }
 
@@ -51,8 +48,12 @@ func (m *MarketCache) Parse(msg string) error {
 		m.Clk = betfairMarketChangeMessage.Clk
 	}
 
+	if betfairMarketChangeMessage.InitialClk != "" {
+		m.InitialClk = betfairMarketChangeMessage.InitialClk
+	}
+
 	if betfairMarketChangeMessage.HeartbeatMs != 0 {
-		m.HeartbeatThreshold = time.Duration(int64(float64(betfairMarketChangeMessage.HeartbeatMs) * 1.05)) * time.Millisecond
+		m.HeartbeatThreshold = time.Duration(int64(float64(betfairMarketChangeMessage.HeartbeatMs)*1.05)) * time.Millisecond
 	}
 
 	switch betfairMarketChangeMessage.Ct {
@@ -73,13 +74,13 @@ func (m *MarketCache) Parse(msg string) error {
 			if ok {
 				market.Update(marketChange)
 			} else {
-				log.Fatalf("market %v not in markets", id)
+				return fmt.Errorf("market %v not in markets", id)
 			}
 		}
 	}
 
-	if timeSinceSent > m.latencyThreshold {
-		return fmt.Errorf("high latency")
+	if timeSinceSent > 0 {
+		return fmt.Errorf("high latency %v", timeSinceSent)
 	}
 
 	m.resetTimer()
